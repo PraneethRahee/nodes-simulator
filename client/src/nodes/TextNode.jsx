@@ -14,14 +14,14 @@ const TextNode = React.memo(({ id, data, isConnectable }) => {
     console.log(`Text ${id} changed to:`, value);
   }, [id]);
 
-  const inputs = (() => {
+  const inputs = React.useMemo(() => {
     const detectedVariables = extractVariables(text);
     return detectedVariables.map((variable, index) => ({
       id: `var-${variable}`,
       position: `${70 + (index * 35)}px`,
       label: variable
     }));
-  })();
+  }, [text]);
 
   const outputs = [{ id: 'output', position: '70px' }];
 

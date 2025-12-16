@@ -40,7 +40,10 @@ const InputNode = React.memo(({ id, data, isConnectable }) => {
             <Label htmlFor={`${id}-type`} className="text-xs font-medium text-slate-700">
               Type
             </Label>
-            <Select defaultValue={data?.inputType || NODE_DEFAULTS.input.inputType}>
+            <Select 
+                defaultValue={data?.inputType || NODE_DEFAULTS.input.inputType}
+                onValueChange={(value) => handleInputChange('inputType', value)}
+            >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
