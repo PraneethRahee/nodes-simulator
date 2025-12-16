@@ -7,17 +7,16 @@ import { Calculator } from 'lucide-react';
 import { NODE_DEFAULTS, INPUT_PLACEHOLDERS } from '../constants/nodeDefaults.js';
 import { MATH_OPERATIONS } from '../constants/selectOptions.js';
 
-const MathNode = React.memo(({ id, data, isConnectable }) => {
-  const handleInputChange = (field, value) => {
-    console.log(`Math ${id} ${field} changed to:`, value);
-  };
-
   const inputs = [
     { id: 'input-a', position: '70px' },
     { id: 'input-b', position: '105px' }
   ];
 
   const outputs = [{ id: 'output', position: '87px' }];
+const MathNode = React.memo(({ id, data, isConnectable }) => {
+  const handleInputChange = (field, value) => {
+    console.log(`Math ${id} ${field} changed to:`, value);
+  };
 
   return (
       <BaseNode

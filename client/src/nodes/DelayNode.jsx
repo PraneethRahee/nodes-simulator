@@ -7,13 +7,12 @@ import { Clock } from 'lucide-react';
 import { NODE_DEFAULTS, INPUT_PLACEHOLDERS } from '../constants/nodeDefaults.js';
 import { TIME_UNITS } from '../constants/selectOptions.js';
 
+const inputs = [{ id: 'input', position: '70px' }];
+const outputs = [{ id: 'output', position: '70px' }];
 const DelayNode = React.memo(({ id, data, isConnectable }) => {
   const handleInputChange = (field, value) => {
     console.log(`Delay ${id} ${field} changed to:`, value);
   };
-
-  const inputs = [{ id: 'input', position: '70px' }];
-  const outputs = [{ id: 'output', position: '70px' }];
 
   return (
       <BaseNode

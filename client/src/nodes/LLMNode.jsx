@@ -9,6 +9,10 @@ import { Expand, Maximize2, HelpCircle, Brain } from 'lucide-react';
 import { NODE_DEFAULTS } from '../constants/nodeDefaults.js';
 import { LLM_MODELS } from '../constants/selectOptions.js';
 
+// Memoize static inputs and outputs arrays to prevent recreation on every render
+const inputs = [{ id: 'input', position: '70px' }];
+const outputs = [{ id: 'output', position: '70px' }];
+
 const LLMNode = React.memo(({ id, data, isConnectable }) => {
   const [systemInstructions, setSystemInstructions] = useState(data?.systemInstructions || NODE_DEFAULTS.llm.systemInstructions);
   const [prompt, setPrompt] = useState(data?.prompt || NODE_DEFAULTS.llm.prompt);
@@ -35,8 +39,6 @@ const LLMNode = React.memo(({ id, data, isConnectable }) => {
     console.log(`LLM ${id} use personal key changed to:`, checked);
   }, [id]);
 
-  const inputs = [{ id: 'input', position: '70px' }];
-  const outputs = [{ id: 'output', position: '70px' }];
 
   return (
       <BaseNode
