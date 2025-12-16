@@ -7,8 +7,7 @@ import { Download } from 'lucide-react';
 import { NODE_DEFAULTS, INPUT_PLACEHOLDERS } from '../constants/nodeDefaults.js';
 import { INPUT_TYPES } from '../constants/selectOptions.js';
 
-// Memoize static outputs array to prevent recreation on every render
-const outputs = [{ id: 'output', position: '70px' }];
+const outputs = [{ id: 'output' }]; 
 
 const InputNode = React.memo(({ id, data, isConnectable }) => {
   const handleInputChange = useCallback((field, value) => {
@@ -17,6 +16,7 @@ const InputNode = React.memo(({ id, data, isConnectable }) => {
 
   return (
       <BaseNode
+          id={id}
           type="input"
           title="Input Node"
           icon={<Download className="w-4 h-4" />}

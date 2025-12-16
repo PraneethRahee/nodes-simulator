@@ -1,4 +1,3 @@
-// Math operations - frozen to prevent array recreation
 export const MATH_OPERATIONS = Object.freeze([
   { value: 'add', label: 'Add (+)' },
   { value: 'subtract', label: 'Subtract (-)' },
@@ -8,7 +7,6 @@ export const MATH_OPERATIONS = Object.freeze([
   { value: 'modulo', label: 'Modulo (%)' }
 ]);
 
-// Logger levels - frozen to prevent array recreation
 export const LOGGER_LEVELS = Object.freeze([
   { value: 'debug', label: 'Debug' },
   { value: 'info', label: 'Info' },
@@ -16,7 +14,6 @@ export const LOGGER_LEVELS = Object.freeze([
   { value: 'error', label: 'Error' }
 ]);
 
-// Input types - frozen to prevent array recreation
 export const INPUT_TYPES = Object.freeze([
   { value: 'text', label: 'Text' },
   { value: 'number', label: 'Number' },
@@ -24,7 +21,6 @@ export const INPUT_TYPES = Object.freeze([
   { value: 'boolean', label: 'Boolean' }
 ]);
 
-// Time units - frozen to prevent array recreation
 export const TIME_UNITS = Object.freeze([
   { value: 'milliseconds', label: 'Milliseconds' },
   { value: 'seconds', label: 'Seconds' },
@@ -32,7 +28,6 @@ export const TIME_UNITS = Object.freeze([
   { value: 'hours', label: 'Hours' }
 ]);
 
-// Condition operators - frozen to prevent array recreation
 export const CONDITION_OPERATORS = Object.freeze([
   { value: 'equals', label: 'Equals (==)' },
   { value: 'not-equals', label: 'Not Equals (!=)' },
@@ -43,7 +38,6 @@ export const CONDITION_OPERATORS = Object.freeze([
   { value: 'contains', label: 'Contains' }
 ]);
 
-// LLM models - frozen to prevent array recreation
 export const LLM_MODELS = Object.freeze([
   { value: 'gpt-4.1', label: 'gpt-4.1' },
   { value: 'gpt-4', label: 'gpt-4' },

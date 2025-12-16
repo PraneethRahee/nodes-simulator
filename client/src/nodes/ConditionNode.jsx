@@ -7,18 +7,18 @@ import { GitBranch } from 'lucide-react';
 import { NODE_DEFAULTS, INPUT_PLACEHOLDERS } from '../constants/nodeDefaults.js';
 import { CONDITION_OPERATORS } from '../constants/selectOptions.js';
 
-// Memoize static inputs and outputs arrays to prevent recreation on every render
-const inputs = [{ id: 'input', position: '70px' }];
 const outputs = [
-  { id: 'true', position: '50px' },
-  { id: 'false', position: '90px' }
+  { id: 'true' },  
+  { id: 'false' } 
 ];
 
+const inputs = [{ id: 'input', position: '-80px' }];
+
 const ConditionNode = React.memo(({ id, data, isConnectable, selected }) => {
+
   const handleInputChange = (field, value) => {
     console.log(`Condition ${id} ${field} changed to:`, value);
   };
-
 
   return (
       <BaseNode

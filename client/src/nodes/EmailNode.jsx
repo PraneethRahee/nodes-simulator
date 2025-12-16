@@ -5,16 +5,17 @@ import { Label } from '../components/ui/label';
 import { Mail } from 'lucide-react';
 import { NODE_DEFAULTS, INPUT_PLACEHOLDERS } from '../constants/nodeDefaults.js';
 
+  const inputs = [{ id: 'input', position: '-80px' }];
+  const outputs = [{ id: 'output', position: '120px' }];
+  
 const EmailNode = React.memo(({ id, data, isConnectable }) => {
   const handleInputChange = (field, value) => {
     console.log(`Email ${id} ${field} changed to:`, value);
   };
 
-  const inputs = [{ id: 'input', position: '70px' }];
-  const outputs = [{ id: 'output', position: '70px' }];
-
   return (
       <BaseNode
+          id={id}
           type="email"
           title="Email Node"
           icon={<Mail className="w-4 h-4" />}
