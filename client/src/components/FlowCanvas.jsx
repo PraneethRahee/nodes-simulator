@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import ReactFlow, {
   Background,
   Controls,
@@ -10,10 +10,13 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { nodeTypes } from '@/nodes/nodeTypes.jsx';
+import { edgeTypes } from '@/components/edgeTypes.jsx';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from '@/components/ui/alert-dialog';
 import { submitPipeline } from "./submit";
+import { deleteNodeById, validateNodeDeletion } from '@/utils/enhancedNodeDeletion.js';
+import { deleteEdgeById, validateEdgeDeletion } from '@/utils/edgeDeletion.js';
 
 const initialNodes = [
   {
@@ -33,14 +36,17 @@ const FlowCanvas = ({
   nodes: externalNodes,
   edges: externalEdges
 }) => {
-  const [nodes, setNodes] = useState(externalNodes || initialNodes);
-  const [edges, setEdges] = useState(externalEdges || initialEdges);
+
+  const [internalNodes, setInternalNodes] = useState(initialNodes);
+  const [internalEdges, setInternalEdges] = useState(initialEdges);
+  
+  const nodes = externalNodes !== undefined ? externalNodes : internalNodes;
+  const edges = externalEdges !== undefined ? externalEdges : internalEdges;
   const [showAlert, setShowAlert] = useState(false);
   const [alertData, setAlertData] = useState({});
   const reactFlowWrapper = useRef(null);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
 
-  // Memoize style objects to prevent recreation
   const alertTitleStyles = useMemo(() => ({
     validDAG: 'bg-emerald-100',
     invalidDAG: 'bg-red-100'
@@ -48,23 +54,31 @@ const FlowCanvas = ({
 
   const onNodesChange = useCallback((changes) => {
     console.log('Node changes:', changes);
-    setNodes((nds) => {
-      const newNodes = applyNodeChanges(changes, nds);
-      console.log('Updated nodes:', newNodes);
-      return newNodes;
-    });
-    if (externalOnNodesChange) externalOnNodesChange(changes);
+    
+    if (externalOnNodesChange) {
+      externalOnNodesChange(changes);
+    } else {
+      setInternalNodes((nds) => {
+        const newNodes = applyNodeChanges(changes, nds);
+        console.log('Updated nodes:', newNodes);
+        return newNodes;
+      });
+    }
   }, [externalOnNodesChange]);
 
   const onEdgesChange = useCallback((changes) => {
-    setEdges((eds) => applyEdgeChanges(changes, eds));
-    if (externalOnEdgesChange) externalOnEdgesChange(changes);
+    if (externalOnEdgesChange) {
+      externalOnEdgesChange(changes);
+    } else {
+      setInternalEdges((eds) => applyEdgeChanges(changes, eds));
+    }
   }, [externalOnEdgesChange]);
 
   const onConnect = useCallback((params) => {
     const newEdge = {
       ...params,
-      type: 'smoothstep',
+      id: `edge-${Date.now()}`, 
+      type: 'custom', 
       animated: true,
       markerEnd: {
         type: MarkerType.Arrow,
@@ -72,14 +86,127 @@ const FlowCanvas = ({
         height: 20,
       },
     };
-    setEdges((eds) => addEdge(newEdge, eds));
-  }, []);
+    
+    if (externalOnEdgesChange) {
+      const change = {
+        type: 'add',
+        item: newEdge
+      };
+      externalOnEdgesChange([change]);
+    } else {
+      setInternalEdges((eds) => addEdge(newEdge, eds));
+    }
+  }, [externalOnEdgesChange]);
 
   const onNodeClick = useCallback((event, node) => {
     if (onNodeSelect) {
       onNodeSelect(node);
     }
   }, [onNodeSelect]);
+  
+  const handleDeleteNode = useCallback((nodeId) => {
+    
+    const validation = validateNodeDeletion(nodes, edges, nodeId);
+    
+    if (!validation.canDelete) {
+      console.error('Cannot delete node:', validation.error);
+      return;
+    }
+    
+    if (validation.warnings.length > 0) {
+      console.warn('Node deletion warnings:', validation.warnings);
+    }
+    
+    deleteNodeById(
+      nodes,
+      (newNodes) => {
+        if (externalOnNodesChange) {
+          const change = {
+            type: 'remove',
+            id: nodeId
+          };
+          externalOnNodesChange([change]);
+        } else {
+          setInternalNodes(newNodes);
+        }
+      },
+      (newEdges) => {
+        if (externalOnEdgesChange) {
+          const connectedEdges = edges.filter(edge =>
+            edge.source === nodeId || edge.target === nodeId
+          );
+          const changes = connectedEdges.map(edge => ({
+            type: 'remove',
+            id: edge.id
+          }));
+          externalOnEdgesChange(changes);
+        } else {
+          setInternalEdges(newEdges);
+        }
+      },
+      nodeId,
+      edges,
+      (result) => {
+        console.log('Node deletion completed:', result);
+      }
+    );
+  }, [nodes, edges, externalOnNodesChange, externalOnEdgesChange]);
+
+  
+  const handleDeleteEdge = useCallback((edgeId) => {
+    
+    const validation = validateEdgeDeletion(nodes, edges, edgeId);
+    
+    if (!validation.canDelete) {
+      console.error('Cannot delete edge:', validation.error);
+      return;
+    }
+    
+    if (validation.warnings.length > 0) {
+      console.warn('Edge deletion warnings:', validation.warnings);
+    }
+    
+    
+    deleteEdgeById(
+      edges,
+      (newEdges) => {
+        if (externalOnEdgesChange) {
+          const change = {
+            type: 'remove',
+            id: edgeId
+          };
+          externalOnEdgesChange([change]);
+        } else {
+          
+          setInternalEdges(newEdges);
+        }
+      },
+      edgeId,
+      (result) => {
+        console.log('Edge deletion completed:', result);
+      }
+    );
+  }, [nodes, edges, externalOnEdgesChange]);
+  
+  useEffect(() => {
+    const handleNodeDeleteEvent = (event) => {
+      const { nodeId } = event.detail;
+      handleDeleteNode(nodeId);
+    };
+
+    const handleEdgeDeleteEvent = (event) => {
+      const { edgeId } = event.detail;
+      handleDeleteEdge(edgeId);
+    };
+
+    document.addEventListener('deleteNode', handleNodeDeleteEvent);
+    document.addEventListener('deleteEdge', handleEdgeDeleteEvent);
+
+    return () => {
+      document.removeEventListener('deleteNode', handleNodeDeleteEvent);
+      document.removeEventListener('deleteEdge', handleEdgeDeleteEvent);
+    };
+  }, [handleDeleteNode, handleDeleteEdge, externalOnNodesChange, externalOnEdgesChange]);
 
   const onDragOver = useCallback((event) => {
     event.preventDefault();
@@ -113,7 +240,16 @@ const FlowCanvas = ({
       };
 
       console.log('Creating new node:', newNode);
-      setNodes((nds) => nds.concat(newNode));
+      
+      if (externalOnNodesChange) {
+        const change = {
+          type: 'add',
+          item: newNode
+        };
+        externalOnNodesChange([change]);
+      } else {
+        setInternalNodes((nds) => nds.concat(newNode));
+      }
     },
     [reactFlowInstance]
   );
@@ -126,11 +262,10 @@ const FlowCanvas = ({
       return;
     }
 
-    alert(`Nodes: ${result.nodeCount}, Edges: ${result.edgeCount}, DAG: ${result.isValidDAG}`);
     setAlertData(result);
+    setShowAlert(true);
   }, [nodes, edges]);
-
-  // Memoize node color map to avoid recreation on every render
+  
   const nodeColorMap = useMemo(() => ({
     input: '#3b82f6',
     output: '#10b981',
@@ -161,6 +296,7 @@ const FlowCanvas = ({
           onDragOver={onDragOver}
           onInit={setReactFlowInstance}
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           fitView={false}
           defaultZoom={1}
           className="bg-slate-50"
@@ -185,8 +321,7 @@ const FlowCanvas = ({
           </CardContent>
         </Card>
       </div>
-
-      {/* Alert Dialog */}
+      
       <AlertDialog open={showAlert} onOpenChange={setShowAlert}>
         <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>

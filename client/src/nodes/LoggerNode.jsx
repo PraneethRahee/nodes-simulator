@@ -7,8 +7,8 @@ import { Input } from '../components/ui/input';
 import { NODE_DEFAULTS, INPUT_PLACEHOLDERS } from '../constants/nodeDefaults.js';
 import { LOGGER_LEVELS } from '../constants/selectOptions.js';
 
-const inputs = [{ id: 'input', position: '70px' }];
-const outputs = [{ id: 'output', position: '70px' }];
+const outputs = [{ id: 'output', position: '120px' }]; 
+const inputs = [{ id: 'input', position: '-80px' }];
 const LoggerNode = React.memo(({ id, data, isConnectable }) => {
   const handleInputChange = (field, value) => {
     console.log(`Logger ${id} ${field} changed to:`, value);
@@ -16,6 +16,7 @@ const LoggerNode = React.memo(({ id, data, isConnectable }) => {
 
   return (
       <BaseNode
+          id={id}
           type="logger"
           title="Logger Node"
           icon={<FileText className="w-4 h-4" />}

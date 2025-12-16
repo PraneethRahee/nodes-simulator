@@ -74,6 +74,28 @@
   font-family: Inter, system-ui, sans-serif;
 }
 
+/* Remove default wrapper styles for input and output nodes */
+.react-flow__node-input,
+.react-flow__node-output {
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  width: auto !important;
+  min-width: auto !important;
+  min-height: auto !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Ensure the card component inside these nodes displays properly */
+.react-flow__node-input > div,
+.react-flow__node-output > div {
+  background: white;
+  border: 2px solid hsl(220, 5.9%, 90%);
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
 .react-flow__handle {
   width: 12px;
   height: 12px;

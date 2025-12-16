@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import BaseNode from '@/components/BaseNode.jsx';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,6 +8,20 @@ import { NODE_DEFAULTS, INPUT_PLACEHOLDERS } from '../constants/nodeDefaults.js'
 
 const TextNode = React.memo(({ id, data, isConnectable }) => {
   const [text, setText] = useState(data?.text || NODE_DEFAULTS.text.text);
+  const textareaRef = useRef(null);
+
+  
+  const adjustHeight = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  }, []);
+  
+  useEffect(() => {
+    adjustHeight();
+  }, [text, adjustHeight]);
 
   const handleTextChange = useCallback((value) => {
     setText(value);
@@ -16,14 +30,19 @@ const TextNode = React.memo(({ id, data, isConnectable }) => {
 
   const inputs = React.useMemo(() => {
     const detectedVariables = extractVariables(text);
+    const variableCount = detectedVariables.length;
+
+    const totalHeight = variableCount * 30;
+    const startPosition = Math.max(60, Math.min(80, (200 - totalHeight) / 2));
+    
     return detectedVariables.map((variable, index) => ({
       id: `var-${variable}`,
-      position: `${70 + (index * 35)}px`,
-      label: variable
+      label: variable,
+      position: `${-startPosition*1.75 + (index * 20)}px`
     }));
   }, [text]);
 
-  const outputs = [{ id: 'output', position: '70px' }];
+  const outputs = [{ id: 'output' }];
 
   return (
     <BaseNode
@@ -42,12 +61,13 @@ const TextNode = React.memo(({ id, data, isConnectable }) => {
             Template
           </Label>
           <Textarea
+            ref={textareaRef}
             id={`${id}-template`}
             placeholder={INPUT_PLACEHOLDERS.textTemplate}
             value={text}
             onChange={(e) => handleTextChange(e.target.value)}
-            className="w-full resize-none"
-            rows={4}
+            className="w-full resize-none overflow-hidden"
+            style={{ minHeight: '80px' }}
           />
         </div>
         {inputs.length > 0 && (

@@ -9,14 +9,14 @@ import DelayNode from './DelayNode.jsx';
 import ConditionNode from './ConditionNode.jsx';
 
 export const nodeTypes = {
-  input: InputNode,
-  output: OutputNode,
-  text: TextNode,
-  llm: LLMNode,
-  email: EmailNode,
-  logger: LoggerNode,
-  condition: ConditionNode,
-  math: MathNode,
-  delay: DelayNode,
+  input: (props) => <InputNode {...props} />,
+  output: (props) => <OutputNode {...props} />,
+  text: (props) => <TextNode {...props} />,
+  llm: (props) => <LLMNode {...props} />,
+  email: (props) => <EmailNode {...props} />,
+  logger: (props) => <LoggerNode {...props} />,
+  condition: (props) => <ConditionNode {...props} />,
+  math: (props) => <MathNode {...props} />,
+  delay: (props) => <DelayNode {...props} />,
 
 };

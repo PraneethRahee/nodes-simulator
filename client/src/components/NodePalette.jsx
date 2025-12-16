@@ -10,7 +10,6 @@ const NodePalette = React.memo(() => {
     event.dataTransfer.effectAllowed = 'move';
   };
 
-  // Memoize node categories to avoid recreation on every render
   const nodeCategories = React.useMemo(() => [
     {
       title: 'Core Nodes',
@@ -33,7 +32,6 @@ const NodePalette = React.memo(() => {
     }
   ], []);
 
-  // Memoize color map to avoid recreation on every render
   const indicatorColorMap = React.useMemo(() => ({
     input: 'bg-blue-600',
     output: 'bg-emerald-600',
