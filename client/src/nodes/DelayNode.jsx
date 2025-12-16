@@ -4,19 +4,24 @@ import { Label } from '../components/ui/label';
 import { Input } from '../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Clock } from 'lucide-react';
+import { NODE_DEFAULTS, INPUT_PLACEHOLDERS } from '../constants/nodeDefaults.js';
+import { TIME_UNITS } from '../constants/selectOptions.js';
 
-const DelayNode = ({ id, data, isConnectable }) => {
+const DelayNode = React.memo(({ id, data, isConnectable }) => {
   const handleInputChange = (field, value) => {
     console.log(`Delay ${id} ${field} changed to:`, value);
   };
+
+  const inputs = [{ id: 'input', position: '70px' }];
+  const outputs = [{ id: 'output', position: '70px' }];
 
   return (
       <BaseNode
           type="delay"
           title="Delay Node"
           icon={<Clock className="w-4 h-4" />}
-          inputs={[{ id: 'input' }]}
-          outputs={[{ id: 'output' }]}
+          inputs={inputs}
+          outputs={outputs}
           isConnectable={isConnectable}
       >
         <div className="space-y-3">
@@ -27,8 +32,8 @@ const DelayNode = ({ id, data, isConnectable }) => {
             <Input
                 id={`${id}-duration`}
                 type="number"
-                placeholder="5"
-                defaultValue={data?.duration || '5'}
+                placeholder={INPUT_PLACEHOLDERS.duration}
+                defaultValue={data?.duration || NODE_DEFAULTS.delay.duration}
                 onChange={(e) => handleInputChange('duration', e.target.value)}
                 className="mt-1"
             />
@@ -37,21 +42,24 @@ const DelayNode = ({ id, data, isConnectable }) => {
             <Label htmlFor={`${id}-unit`} className="text-sm font-medium text-slate-700">
               Unit
             </Label>
-            <Select defaultValue={data?.unit || 'seconds'} onValueChange={(value) => handleInputChange('unit', value)}>
+            <Select defaultValue={data?.unit || NODE_DEFAULTS.delay.unit} onValueChange={(value) => handleInputChange('unit', value)}>
               <SelectTrigger className="mt-1">
                 <SelectValue placeholder="Select unit" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="milliseconds">Milliseconds</SelectItem>
-                <SelectItem value="seconds">Seconds</SelectItem>
-                <SelectItem value="minutes">Minutes</SelectItem>
-                <SelectItem value="hours">Hours</SelectItem>
+                {TIME_UNITS.map(unit => (
+                  <SelectItem key={unit.value} value={unit.value}>
+                    {unit.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
         </div>
       </BaseNode>
   );
-};
+});
+
+DelayNode.displayName = 'DelayNode';
 
 export default DelayNode;

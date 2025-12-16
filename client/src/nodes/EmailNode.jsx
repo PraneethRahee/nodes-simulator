@@ -3,18 +3,23 @@ import BaseNode from '../components/BaseNode.jsx';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Mail } from 'lucide-react';
+import { NODE_DEFAULTS, INPUT_PLACEHOLDERS } from '../constants/nodeDefaults.js';
 
-const EmailNode = ({ id, data, isConnectable }) => {
+const EmailNode = React.memo(({ id, data, isConnectable }) => {
   const handleInputChange = (field, value) => {
     console.log(`Email ${id} ${field} changed to:`, value);
   };
+
+  const inputs = [{ id: 'input', position: '70px' }];
+  const outputs = [{ id: 'output', position: '70px' }];
 
   return (
       <BaseNode
           type="email"
           title="Email Node"
           icon={<Mail className="w-4 h-4" />}
-          inputs={[{ id: 'input' }]}
+          inputs={inputs}
+          outputs={outputs}
           isConnectable={isConnectable}
       >
         <div className="space-y-3">
@@ -25,8 +30,8 @@ const EmailNode = ({ id, data, isConnectable }) => {
             <Input
                 id={`${id}-to`}
                 type="email"
-                placeholder="recipient@example.com"
-                defaultValue={data?.to || ''}
+                placeholder={INPUT_PLACEHOLDERS.emailTo}
+                defaultValue={data?.to || NODE_DEFAULTS.email.to}
                 onChange={(e) => handleInputChange('to', e.target.value)}
                 className="mt-1"
             />
@@ -37,8 +42,8 @@ const EmailNode = ({ id, data, isConnectable }) => {
             </Label>
             <Input
                 id={`${id}-subject`}
-                placeholder="Email subject"
-                defaultValue={data?.subject || ''}
+                placeholder={INPUT_PLACEHOLDERS.emailSubject}
+                defaultValue={data?.subject || NODE_DEFAULTS.email.subject}
                 onChange={(e) => handleInputChange('subject', e.target.value)}
                 className="mt-1"
             />
@@ -46,6 +51,8 @@ const EmailNode = ({ id, data, isConnectable }) => {
         </div>
       </BaseNode>
   );
-};
+});
+
+EmailNode.displayName = 'EmailNode';
 
 export default EmailNode;

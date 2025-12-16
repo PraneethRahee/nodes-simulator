@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 import ReactFlow, {
   Background,
   Controls,
@@ -10,11 +10,9 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { nodeTypes } from '@/nodes/nodeTypes.jsx';
-// import { validateDAG } from '@/utils/dagValidation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from '@/components/ui/alert-dialog';
-
 import { submitPipeline } from "./submit";
 
 const initialNodes = [
@@ -26,12 +24,10 @@ const initialNodes = [
   },
 ];
 
-
 const initialEdges = [];
 
 const FlowCanvas = ({
   onNodeSelect,
-  selectedNode,
   onNodesChange: externalOnNodesChange,
   onEdgesChange: externalOnEdgesChange,
   nodes: externalNodes,
@@ -43,6 +39,12 @@ const FlowCanvas = ({
   const [alertData, setAlertData] = useState({});
   const reactFlowWrapper = useRef(null);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
+
+  // Memoize style objects to prevent recreation
+  const alertTitleStyles = useMemo(() => ({
+    validDAG: 'bg-emerald-100',
+    invalidDAG: 'bg-red-100'
+  }), []);
 
   const onNodesChange = useCallback((changes) => {
     console.log('Node changes:', changes);
@@ -116,8 +118,7 @@ const FlowCanvas = ({
     [reactFlowInstance]
   );
 
-  const handleSubmit = async () => {
-
+  const handleSubmit = useCallback(async () => {
     const result = await submitPipeline(nodes, edges);
 
     if (!result) {
@@ -127,34 +128,24 @@ const FlowCanvas = ({
 
     alert(`Nodes: ${result.nodeCount}, Edges: ${result.edgeCount}, DAG: ${result.isValidDAG}`);
     setAlertData(result);
-  };
+  }, [nodes, edges]);
 
+  // Memoize node color map to avoid recreation on every render
+  const nodeColorMap = useMemo(() => ({
+    input: '#3b82f6',
+    output: '#10b981',
+    text: '#8b5cf6',
+    llm: '#f59e0b',
+    email: '#ec4899',
+    logger: '#6b7280',
+    math: '#06b6d4',
+    delay: '#f97316',
+    condition: '#84cc16'
+  }), []);
 
-
-  // const getNodeCountColor = () => {
-  //   if (nodes.length === 0) return 'text-gray-500';
-  //   if (nodes.length < 5) return 'text-blue-600';
-  //   if (nodes.length < 10) return 'text-green-600';
-  //   return 'text-amber-600';
-  // };
-
-  // const getEdgeCountColor = () => {
-  //   if (edges.length === 0) return 'text-gray-500';
-  //   if (edges.length < 3) return 'text-blue-600';
-  //   if (edges.length < 8) return 'text-green-600';
-  //   return 'text-amber-600';
-  // };
-
-  // const getDAGStatus = () => {
-  //   if (nodes.length === 0) return { text: 'No nodes', color: 'text-gray-500' };
-  //   const validation = validateDAG(nodes, edges);
-  //   return {
-  //     text: validation.isValid ? 'Valid DAG' : 'Invalid DAG',
-  //     color: validation.isValid ? 'text-emerald-600' : 'text-red-600'
-  //   };
-  // };
-  //
-  // const dagStatus = getDAGStatus();
+  const getNodeColor = useCallback((nodeType) => {
+    return nodeColorMap[nodeType] || '#64748b';
+  }, [nodeColorMap]);
 
   return (
     <div className="flex-1 flex flex-col">
@@ -177,25 +168,11 @@ const FlowCanvas = ({
           <Background variant="dots" gap={20} size={1} />
           <Controls />
           <MiniMap
-            nodeColor={(node) => {
-              const colorMap = {
-                input: '#3b82f6',
-                output: '#10b981',
-                text: '#8b5cf6',
-                llm: '#f59e0b',
-                email: '#ec4899',
-                logger: '#6b7280',
-                math: '#06b6d4',
-                delay: '#f97316',
-                condition: '#84cc16'
-              };
-              return colorMap[node.type] || '#64748b';
-            }}
+            nodeColor={getNodeColor}
             maskColor="rgba(255, 255, 255, 0.8)"
           />
         </ReactFlow>
       </div>
-
 
       <div className="absolute bottom-4 left-4 right-4 flex justify-center">
         <Card className="bg-white/95 backdrop-blur-sm border-slate-200">
@@ -204,7 +181,6 @@ const FlowCanvas = ({
               <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700">
                 Submit
               </Button>
-
             </div>
           </CardContent>
         </Card>
@@ -216,7 +192,7 @@ const FlowCanvas = ({
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center space-x-3">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                alertData.isValidDAG ? 'bg-emerald-100' : 'bg-red-100'
+                alertData.isValidDAG ? alertTitleStyles.validDAG : alertTitleStyles.invalidDAG
               }`}>
                 {alertData.isValidDAG ? (
                   <div className="w-4 h-4 bg-emerald-600 rounded-full" />
@@ -239,7 +215,9 @@ const FlowCanvas = ({
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-slate-600">DAG Status:</span>
-                <span className={`font-semibold ${alertData.isValidDAG ? 'text-emerald-600' : 'text-red-600'}`}>
+                <span className={`font-semibold ${
+                  alertData.isValidDAG ? 'text-emerald-600' : 'text-red-600'
+                }`}>
                   {alertData.isValidDAG ? 'Valid' : 'Invalid'}
                 </span>
               </div>
@@ -263,6 +241,3 @@ const FlowCanvas = ({
 };
 
 export default FlowCanvas;
-
-
-

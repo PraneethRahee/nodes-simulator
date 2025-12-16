@@ -7,7 +7,38 @@ This project consists of a React frontend with a FastAPI backend for a pipeline 
 ```
 frontendassign/
 ├── client/          # React frontend application
+│   ├── src/
+│   │   ├── components/     # React components
+│   │   │   ├── BaseNode.jsx     # Base component for all nodes
+│   │   │   ├── FlowCanvas.jsx   # Main canvas for pipeline editing
+│   │   │   ├── NodePalette.jsx   # Sidebar with available nodes
+│   │   │   ├── submit.jsx        # API submission logic
+│   │   │   └── ui/              # UI components (only used ones)
+│   │   ├── nodes/          # Node type components
+│   │   │   ├── InputNode.jsx
+│   │   │   ├── OutputNode.jsx
+│   │   │   ├── TextNode.jsx
+│   │   │   ├── LLMNode.jsx
+│   │   │   ├── EmailNode.jsx
+│   │   │   ├── LoggerNode.jsx
+│   │   │   ├── MathNode.jsx
+│   │   │   ├── DelayNode.jsx
+│   │   │   ├── ConditionNode.jsx
+│   │   │   └── nodeTypes.jsx    # Node type registry
+│   │   ├── pages/          # Page components
+│   │   │   └── PipelineEditor.jsx
+│   │   ├── utils/          # Utility functions
+│   │   │   ├── dagValidation.js
+│   │   │   └── variableDetection.js
+│   │   ├── lib/           # Library utilities
+│   │   │   └── utils.ts
+│   │   ├── App.jsx         # Main App component
+│   │   └── main.jsx        # Application entry point
+│   ├── package.json
+│   └── package-lock.json
 ├── server/          # FastAPI backend application
+│   ├── main.py          # Main FastAPI application
+│   └── requirements.txt  # Python dependencies
 └── README.md        # This file
 ```
 
@@ -151,8 +182,37 @@ Validates a pipeline structure and determines if it forms a valid Directed Acycl
    - Try clearing the npm cache: `npm cache clean --force`
    - Delete node_modules and package-lock.json, then run `npm install` again
 
+## Cleanup Performed
+
+This project has been cleaned up to remove unnecessary dependencies and unused files:
+
+### Removed Packages
+- Removed over 255 unnecessary npm packages including database libraries, authentication systems, and unused UI components
+- Kept only essential packages: React, ReactFlow, Radix UI components (used ones), Tailwind CSS, and Lucide icons
+
+### Removed Files
+- Unused UI component files (accordion, avatar, breadcrumb, calendar, carousel, etc.)
+- Unused hooks (use-mobile.tsx, use-toast.ts)
+- Unused utility files (queryClient.ts)
+- Unused pages (not-found.tsx)
+- Unused configuration files (babel.json)
+- Commented-out PropertiesPanel component and related code
+
+### Current Dependencies
+**Frontend:**
+- React 18.3.1
+- ReactFlow 11.11.4
+- Radix UI components (alert-dialog, button, card, checkbox, input, label, select, switch, textarea, toast, tooltip)
+- Tailwind CSS 3.4.17
+- Lucide React icons
+- Vite for development
+
+**Backend:**
+- FastAPI 0.104.1
+- Uvicorn 0.24.0
+
 ## Development Notes
 
 - The backend uses CORS middleware to allow requests from any origin
 - The frontend uses React Flow for creating visual pipeline representations
-- The project includes various UI components built with Radix UI and styled with Tailwind CSS
+- The project includes essential UI components built with Radix UI and styled with Tailwind CSS
