@@ -4,11 +4,19 @@ import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Input } from '../components/ui/input';
 import { GitBranch } from 'lucide-react';
+import { NODE_DEFAULTS, INPUT_PLACEHOLDERS } from '../constants/nodeDefaults.js';
+import { CONDITION_OPERATORS } from '../constants/selectOptions.js';
 
-const ConditionNode = ({ id, data, isConnectable, selected }) => {
+const ConditionNode = React.memo(({ id, data, isConnectable, selected }) => {
   const handleInputChange = (field, value) => {
     console.log(`Condition ${id} ${field} changed to:`, value);
   };
+
+  const inputs = [{ id: 'input', position: '70px' }];
+  const outputs = [
+    { id: 'true', position: '50px' },
+    { id: 'false', position: '90px' }
+  ];
 
   return (
       <BaseNode
@@ -17,11 +25,8 @@ const ConditionNode = ({ id, data, isConnectable, selected }) => {
           type="condition"
           title="Condition Node"
           icon={<GitBranch className="w-4 h-4" />}
-          inputs={[{ id: 'input' }]}
-          outputs={[
-            { id: 'true', position: '30%' },
-            { id: 'false', position: '70%' }
-          ]}
+          inputs={inputs}
+          outputs={outputs}
           isConnectable={isConnectable}
           className={selected ? 'ring-2 ring-blue-500' : ''}
       >
@@ -30,18 +35,16 @@ const ConditionNode = ({ id, data, isConnectable, selected }) => {
             <Label htmlFor={`${id}-operator`} className="text-xs font-medium text-slate-700">
               Operator
             </Label>
-            <Select defaultValue={data?.operator || 'equals'} onValueChange={(value) => handleInputChange('operator', value)}>
+            <Select defaultValue={data?.operator || NODE_DEFAULTS.condition.operator} onValueChange={(value) => handleInputChange('operator', value)}>
               <SelectTrigger className="w-full" onMouseDown={(e) => e.stopPropagation()}>
                 <SelectValue placeholder="Select operator" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="equals">Equals (==)</SelectItem>
-                <SelectItem value="not-equals">Not Equals (!=)</SelectItem>
-                <SelectItem value="greater">Greater Than (&gt;)</SelectItem>
-                <SelectItem value="less">Less Than (&lt;)</SelectItem>
-                <SelectItem value="greater-equal">Greater or Equal (&gt;=)</SelectItem>
-                <SelectItem value="less-equal">Less or Equal (&lt;=)</SelectItem>
-                <SelectItem value="contains">Contains</SelectItem>
+                {CONDITION_OPERATORS.map(op => (
+                  <SelectItem key={op.value} value={op.value}>
+                    {op.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -51,8 +54,8 @@ const ConditionNode = ({ id, data, isConnectable, selected }) => {
             </Label>
             <Input
                 id={`${id}-value`}
-                placeholder="Value to compare"
-                defaultValue={data?.value || ''}
+                placeholder={INPUT_PLACEHOLDERS.compareValue}
+                defaultValue={data?.value || NODE_DEFAULTS.condition.value}
                 onChange={(e) => handleInputChange('value', e.target.value)}
                 onMouseDown={(e) => e.stopPropagation()}
                 className="w-full text-sm"
@@ -61,6 +64,8 @@ const ConditionNode = ({ id, data, isConnectable, selected }) => {
         </div>
       </BaseNode>
   );
-};
+});
+
+ConditionNode.displayName = 'ConditionNode';
 
 export default ConditionNode;

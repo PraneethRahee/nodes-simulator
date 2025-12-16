@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import BaseNode from '../components/BaseNode.jsx';
 import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
@@ -6,40 +6,45 @@ import { Textarea } from '../components/ui/textarea';
 import { Switch } from '../components/ui/switch';
 import { Button } from '../components/ui/button';
 import { Expand, Maximize2, HelpCircle, Brain } from 'lucide-react';
+import { NODE_DEFAULTS } from '../constants/nodeDefaults.js';
+import { LLM_MODELS } from '../constants/selectOptions.js';
 
-const LLMNode = ({ id, data, isConnectable }) => {
-  const [systemInstructions, setSystemInstructions] = useState(data?.systemInstructions || 'Answer the question based on context');
-  const [prompt, setPrompt] = useState(data?.prompt || 'Question :\n\nContext :');
-  const [model, setModel] = useState(data?.model || 'gpt-4.1');
-  const [usePersonalKey, setUsePersonalKey] = useState(data?.usePersonalKey || false);
+const LLMNode = React.memo(({ id, data, isConnectable }) => {
+  const [systemInstructions, setSystemInstructions] = useState(data?.systemInstructions || NODE_DEFAULTS.llm.systemInstructions);
+  const [prompt, setPrompt] = useState(data?.prompt || NODE_DEFAULTS.llm.prompt);
+  const [model, setModel] = useState(data?.model || NODE_DEFAULTS.llm.model);
+  const [usePersonalKey, setUsePersonalKey] = useState(data?.usePersonalKey || NODE_DEFAULTS.llm.usePersonalKey);
 
-  const handleModelChange = (value) => {
+  const handleModelChange = useCallback((value) => {
     setModel(value);
     console.log(`LLM ${id} model changed to:`, value);
-  };
+  }, [id]);
 
-  const handleSystemInstructionsChange = (value) => {
+  const handleSystemInstructionsChange = useCallback((value) => {
     setSystemInstructions(value);
     console.log(`LLM ${id} system instructions changed to:`, value);
-  };
+  }, [id]);
 
-  const handlePromptChange = (value) => {
+  const handlePromptChange = useCallback((value) => {
     setPrompt(value);
     console.log(`LLM ${id} prompt changed to:`, value);
-  };
+  }, [id]);
 
-  const handleUsePersonalKeyChange = (checked) => {
+  const handleUsePersonalKeyChange = useCallback((checked) => {
     setUsePersonalKey(checked);
     console.log(`LLM ${id} use personal key changed to:`, checked);
-  };
+  }, [id]);
+
+  const inputs = [{ id: 'input', position: '70px' }];
+  const outputs = [{ id: 'output', position: '70px' }];
 
   return (
       <BaseNode
           type="llm"
           title="OpenAI"
           icon={<Brain className="w-4 h-4" />}
-          inputs={[{ id: 'input' }]}
-          outputs={[{ id: 'output' }]}
+          inputs={inputs}
+          outputs={outputs}
           isConnectable={isConnectable}
       >
         <div className="space-y-4">
@@ -113,10 +118,11 @@ const LLMNode = ({ id, data, isConnectable }) => {
                 <SelectValue placeholder="Select model" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="gpt-4.1">gpt-4.1</SelectItem>
-                <SelectItem value="gpt-4">gpt-4</SelectItem>
-                <SelectItem value="gpt-3.5-turbo">gpt-3.5-turbo</SelectItem>
-                <SelectItem value="claude-3">claude-3</SelectItem>
+                {LLM_MODELS.map(model => (
+                  <SelectItem key={model.value} value={model.value}>
+                    {model.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -137,6 +143,8 @@ const LLMNode = ({ id, data, isConnectable }) => {
         </div>
       </BaseNode>
   );
-};
+});
+
+LLMNode.displayName = 'LLMNode';
 
 export default LLMNode;

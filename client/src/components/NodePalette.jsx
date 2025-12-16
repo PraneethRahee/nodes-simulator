@@ -3,14 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Play, Save, Download } from 'lucide-react';
 
-const NodePalette = ({ onSubmit }) => {
+const NodePalette = React.memo(() => {
   const onDragStart = (event, nodeType) => {
     console.log('Drag started for node type:', nodeType);
     event.dataTransfer.setData('application/reactflow', nodeType);
     event.dataTransfer.effectAllowed = 'move';
   };
 
-  const nodeCategories = [
+  // Memoize node categories to avoid recreation on every render
+  const nodeCategories = React.useMemo(() => [
     {
       title: 'Core Nodes',
       nodes: [
@@ -30,27 +31,27 @@ const NodePalette = ({ onSubmit }) => {
         { type: 'condition', title: 'Condition Node', description: 'Conditional logic', color: 'bg-lime-50 border-lime-200 hover:bg-lime-100' },
       ]
     }
-  ];
+  ], []);
 
-  const getIndicatorColor = (nodeType) => {
-    const colorMap = {
-      input: 'bg-blue-600',
-      output: 'bg-emerald-600',
-      text: 'bg-purple-600',
-      llm: 'bg-amber-600',
-      email: 'bg-pink-600',
-      logger: 'bg-gray-600',
-      math: 'bg-cyan-600',
-      delay: 'bg-orange-600',
-      condition: 'bg-lime-600'
-    };
-    return colorMap[nodeType] || 'bg-slate-600';
-  };
+  // Memoize color map to avoid recreation on every render
+  const indicatorColorMap = React.useMemo(() => ({
+    input: 'bg-blue-600',
+    output: 'bg-emerald-600',
+    text: 'bg-purple-600',
+    llm: 'bg-amber-600',
+    email: 'bg-pink-600',
+    logger: 'bg-gray-600',
+    math: 'bg-cyan-600',
+    delay: 'bg-orange-600',
+    condition: 'bg-lime-600'
+  }), []);
+
+  const getIndicatorColor = React.useCallback((nodeType) => {
+    return indicatorColorMap[nodeType] || 'bg-slate-600';
+  }, [indicatorColorMap]);
 
   return (
     <div className="w-80 bg-white border-r border-slate-200 flex flex-col">
-
-
       <div className="flex-1 overflow-y-auto p-6">
         <div className="space-y-6">
           {nodeCategories.map((category) => (
@@ -80,6 +81,8 @@ const NodePalette = ({ onSubmit }) => {
       </div>
     </div>
   );
-};
+});
+
+NodePalette.displayName = 'NodePalette';
 
 export default NodePalette;

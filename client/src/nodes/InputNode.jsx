@@ -1,21 +1,26 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import BaseNode from '../components/BaseNode.jsx';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Download } from 'lucide-react';
+import { NODE_DEFAULTS, INPUT_PLACEHOLDERS } from '../constants/nodeDefaults.js';
+import { INPUT_TYPES } from '../constants/selectOptions.js';
 
-const InputNode = ({ id, data, isConnectable }) => {
-  const handleInputChange = (field, value) => {
+// Memoize static outputs array to prevent recreation on every render
+const outputs = [{ id: 'output', position: '70px' }];
+
+const InputNode = React.memo(({ id, data, isConnectable }) => {
+  const handleInputChange = useCallback((field, value) => {
     console.log(`Input ${id} ${field} changed to:`, value);
-  };
+  }, [id]);
 
   return (
       <BaseNode
           type="input"
           title="Input Node"
           icon={<Download className="w-4 h-4" />}
-          outputs={[{ id: 'output' }]}
+          outputs={outputs}
           isConnectable={isConnectable}
       >
         <div className="space-y-3">
@@ -25,8 +30,8 @@ const InputNode = ({ id, data, isConnectable }) => {
             </Label>
             <Input
                 id={`${id}-fieldname`}
-                placeholder="Enter field name"
-                defaultValue={data?.fieldName || 'user_input'}
+                placeholder={INPUT_PLACEHOLDERS.fieldName}
+                defaultValue={data?.fieldName || NODE_DEFAULTS.input.fieldName}
                 onChange={(e) => handleInputChange('fieldName', e.target.value)}
                 className="w-full text-sm"
             />
@@ -35,22 +40,24 @@ const InputNode = ({ id, data, isConnectable }) => {
             <Label htmlFor={`${id}-type`} className="text-xs font-medium text-slate-700">
               Type
             </Label>
-            <Select defaultValue={data?.inputType || 'text'}>
+            <Select defaultValue={data?.inputType || NODE_DEFAULTS.input.inputType}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="text">Text</SelectItem>
-                <SelectItem value="number">Number</SelectItem>
-                <SelectItem value="file">File</SelectItem>
-                <SelectItem value="boolean">Boolean</SelectItem>
+                {INPUT_TYPES.map(type => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
         </div>
       </BaseNode>
   );
-};
+});
+
+InputNode.displayName = 'InputNode';
 
 export default InputNode;
-
