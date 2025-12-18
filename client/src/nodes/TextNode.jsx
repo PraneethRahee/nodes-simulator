@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import BaseNode from '@/components/BaseNode.jsx';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { extractVariables } from '@/utils/variableDetection';
+import { useExtractVariables } from '@/utils/variableDetection';
 import { Info } from 'lucide-react';
 import { NODE_DEFAULTS, INPUT_PLACEHOLDERS } from '../constants/nodeDefaults.js';
 
@@ -28,8 +28,9 @@ const TextNode = React.memo(({ id, data, isConnectable }) => {
     console.log(`Text ${id} changed to:`, value);
   }, [id]);
 
+  const detectedVariables = useExtractVariables(text);
+  
   const inputs = React.useMemo(() => {
-    const detectedVariables = extractVariables(text);
     const variableCount = detectedVariables.length;
 
     const totalHeight = variableCount * 30;
@@ -40,7 +41,7 @@ const TextNode = React.memo(({ id, data, isConnectable }) => {
       label: variable,
       position: `${-startPosition*1.75 + (index * 20)}px`
     }));
-  }, [text]);
+  }, [detectedVariables]);
 
   const outputs = [{ id: 'output' }];
 

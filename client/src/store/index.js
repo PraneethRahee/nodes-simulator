@@ -17,7 +17,6 @@ export const store = configureStore({
     }),
 });
 
-// Export all actions and selectors
 export * from './nodesSlice';
 export * from './edgesSlice';
 export * from './uiSlice';

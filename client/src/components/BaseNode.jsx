@@ -75,7 +75,7 @@ const createOutputHandles = (outputs, handleColor, isConnectable) =>
     );
   });
 
-const BaseNode = React.memo(({type,title,icon,children,inputs = [],outputs = [],className,isConnectable = true,id, onDeleteNode}) => {
+const BaseNode = React.memo(({type,title,icon,children,inputs = [],outputs = [],className,isConnectable = true,id, onDeleteNode, onNodeDelete}) => {
   const colorClasses = React.useMemo(() => ({
     handle: NODE_HANDLE_COLORS[type] || DEFAULT_HANDLE_COLOR,
     header: NODE_COLOR_CLASSES[type] || DEFAULT_NODE_COLOR,
@@ -95,8 +95,12 @@ const BaseNode = React.memo(({type,title,icon,children,inputs = [],outputs = [],
   const handleNodeDelete = React.useCallback((nodeId) => {
     console.log(`BaseNode handleNodeDelete called with nodeId: ${nodeId}`);
     console.log('onDeleteNode function:', onDeleteNode);
-    onDeleteNode(nodeId);
-  }, [onDeleteNode]);
+    if (onDeleteNode) {
+      onDeleteNode(nodeId);
+    } else if (onNodeDelete) {
+      onNodeDelete(nodeId);
+    }
+  }, [onDeleteNode, onNodeDelete]);
 
   const cardClasses = React.useMemo(() =>
     cn(

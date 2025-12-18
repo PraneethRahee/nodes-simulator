@@ -1,39 +1,50 @@
-import InputNode from './InputNode.jsx';
-import OutputNode from './OutputNode.jsx';
-import TextNode from './TextNode.jsx';
-import LLMNode from './LLMNode.jsx';
-import EmailNode from './EmailNode.jsx';
-import LoggerNode from './LoggerNode.jsx';
-import MathNode from './MathNode.jsx';
-import DelayNode from './DelayNode.jsx';
-import ConditionNode from './ConditionNode.jsx';
+import React, { lazy, Suspense } from 'react';
 
-// Create a higher-order component that adds the delete handler to any node type
+// Lazy load node components to reduce initial bundle size
+const InputNode = lazy(() => import('./InputNode.jsx'));
+const OutputNode = lazy(() => import('./OutputNode.jsx'));
+const TextNode = lazy(() => import('./TextNode.jsx'));
+const LLMNode = lazy(() => import('./LLMNode.jsx'));
+const EmailNode = lazy(() => import('./EmailNode.jsx'));
+const LoggerNode = lazy(() => import('./LoggerNode.jsx'));
+const MathNode = lazy(() => import('./MathNode.jsx'));
+const DelayNode = lazy(() => import('./DelayNode.jsx'));
+const ConditionNode = lazy(() => import('./ConditionNode.jsx'));
+
 const withNodeDelete = (NodeComponent) => {
-  const WithDeleteNode = (props) => {
-    const handleNodeDelete = (nodeId) => {
+  const WithDeleteNode = React.memo((props) => {
+    const handleNodeDelete = React.useCallback((nodeId) => {
       console.log(`${NodeComponent.name} onDeleteNode called with nodeId: ${nodeId}`);
       if (props.onDeleteNode) {
         props.onDeleteNode(nodeId);
       }
-    };
+    }, [props.onDeleteNode]);
     
     return <NodeComponent {...props} onDeleteNode={handleNodeDelete} />;
-  };
+  });
   
   WithDeleteNode.displayName = `WithDeleteNode(${NodeComponent.name})`;
   
   return WithDeleteNode;
 };
 
+const createLazyNodeType = (NodeComponent) => {
+  const LazyNodeComponent = withNodeDelete(NodeComponent);
+  return React.memo((props) => (
+    <Suspense fallback={<div className="w-80 h-40 bg-slate-100 animate-pulse rounded-lg" />}>
+      <LazyNodeComponent {...props} />
+    </Suspense>
+  ));
+};
+
 export const nodeTypes = {
-  input: withNodeDelete(InputNode),
-  output: withNodeDelete(OutputNode),
-  text: withNodeDelete(TextNode),
-  llm: withNodeDelete(LLMNode),
-  email: withNodeDelete(EmailNode),
-  logger: withNodeDelete(LoggerNode),
-  condition: withNodeDelete(ConditionNode),
-  math: withNodeDelete(MathNode),
-  delay: withNodeDelete(DelayNode),
+  input: createLazyNodeType(InputNode),
+  output: createLazyNodeType(OutputNode),
+  text: createLazyNodeType(TextNode),
+  llm: createLazyNodeType(LLMNode),
+  email: createLazyNodeType(EmailNode),
+  logger: createLazyNodeType(LoggerNode),
+  condition: createLazyNodeType(ConditionNode),
+  math: createLazyNodeType(MathNode),
+  delay: createLazyNodeType(DelayNode),
 };

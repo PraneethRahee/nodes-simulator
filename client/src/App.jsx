@@ -2,7 +2,6 @@ import { Suspense, lazy } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-// Lazy load the optimized pipeline editor
 const OptimizedPipelineEditor = lazy(() => import('@/pages/OptimizedPipelineEditor.jsx'));
 
 function App() {
