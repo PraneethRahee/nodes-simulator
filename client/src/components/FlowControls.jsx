@@ -1,34 +1,36 @@
 import React, { useCallback } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { submitPipeline } from "./submit.jsx";
+import { selectNodesCount, setError } from '@/store';
+import { submitPipeline } from '@/store/thunks';
 
-const FlowControls = React.memo(({ nodes, edges, onAlert, onError }) => {
-  // Memoized submit handler
+const FlowControls = React.memo(() => {
+  const dispatch = useDispatch();
+  const nodesCount = useSelector(selectNodesCount);
+  
   const handleSubmit = useCallback(async () => {
     try {
-      const result = await submitPipeline(nodes, edges);
+      const result = await dispatch(submitPipeline());
 
       if (!result) {
-        onError("Backend not reachable");
+        dispatch(setError("Backend not reachable"));
         return;
       }
-
-      onAlert(result);
     } catch (error) {
-      onError(error.message || "An error occurred during submission");
+      dispatch(setError(error.message || "An error occurred during submission"));
     }
-  }, [nodes, edges, onAlert, onError]);
+  }, [dispatch]);
 
   return (
     <div className="absolute bottom-4 left-4 right-4 flex justify-center">
       <Card className="bg-white/95 backdrop-blur-sm border-slate-200">
         <CardContent className="p-4">
           <div className="flex space-x-2">
-            <Button 
-              onClick={handleSubmit} 
+            <Button
+              onClick={handleSubmit}
               className="bg-blue-600 hover:bg-blue-700"
-              disabled={nodes.length === 0}
+              disabled={nodesCount === 0}
             >
               Submit Pipeline
             </Button>

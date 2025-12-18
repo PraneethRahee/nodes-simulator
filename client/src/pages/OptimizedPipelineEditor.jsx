@@ -1,7 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import NodePalette from '@/components/NodePalette.jsx';
 
-// Lazy load the optimized flow canvas
 const OptimizedFlowCanvas = lazy(() => import('@/components/OptimizedFlowCanvas.jsx'));
 
 const OptimizedPipelineEditor = () => {
