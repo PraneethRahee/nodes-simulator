@@ -27,6 +27,7 @@ import { MATH_OPERATIONS } from '../constants/selectOptions.js';
           inputs={inputs}
           outputs={outputs}
           isConnectable={isConnectable}
+          onDeleteNode={data?.onDeleteNode}
       >
         <div className="space-y-3">
           <div>

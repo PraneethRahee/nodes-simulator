@@ -2,7 +2,7 @@ import React, { memo, useCallback } from 'react';
 import { X } from 'lucide-react';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from './ui/alert-dialog';
 
-const EdgeDeleteButton = memo(({ edgeId }) => {
+const EdgeDeleteButton = memo(({ edgeId, onDeleteEdge }) => {
   const [showDialog, setShowDialog] = React.useState(false);
 
   const handleDeleteClick = useCallback((e) => {
@@ -11,10 +11,11 @@ const EdgeDeleteButton = memo(({ edgeId }) => {
   }, []);
 
   const handleConfirmDelete = useCallback(() => {
-    const event = new CustomEvent('deleteEdge', { detail: { edgeId } });
-    document.dispatchEvent(event);
+    if (onDeleteEdge) {
+      onDeleteEdge(edgeId);
+    }
     setShowDialog(false);
-  }, [edgeId]);
+  }, [edgeId, onDeleteEdge]);
 
   const handleCancel = useCallback(() => {
     setShowDialog(false);
@@ -23,7 +24,7 @@ const EdgeDeleteButton = memo(({ edgeId }) => {
   return (
     <>
       <button
-        className="absolute top-1/2 right-1/2 bg-white border border-red-500 rounded-full p-1 hover:bg-red-50 transition-colors cursor-pointer shadow-md opacity-0 hover:opacity-100 group-hover:opacity-100"
+        className="absolute top-1/2 right-1/2 bg-white border border-red-500 rounded-full p-1 hover:bg-red-50 transition-colors cursor-pointer shadow-md opacity-100"
         style={{
           width: '20px',
           height: '20px',

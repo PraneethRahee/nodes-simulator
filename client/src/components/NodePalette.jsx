@@ -1,16 +1,18 @@
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Play, Save, Download } from 'lucide-react';
 
 const NodePalette = React.memo(() => {
-  const onDragStart = (event, nodeType) => {
+  // Memoized drag start handler
+  const onDragStart = useCallback((event, nodeType) => {
     console.log('Drag started for node type:', nodeType);
     event.dataTransfer.setData('application/reactflow', nodeType);
     event.dataTransfer.effectAllowed = 'move';
-  };
+  }, []);
 
-  const nodeCategories = React.useMemo(() => [
+  // Memoized node categories to prevent recreation
+  const nodeCategories = useMemo(() => [
     {
       title: 'Core Nodes',
       nodes: [
@@ -32,7 +34,8 @@ const NodePalette = React.memo(() => {
     }
   ], []);
 
-  const indicatorColorMap = React.useMemo(() => ({
+  // Memoized indicator color map
+  const indicatorColorMap = useMemo(() => ({
     input: 'bg-blue-600',
     output: 'bg-emerald-600',
     text: 'bg-purple-600',
@@ -44,36 +47,46 @@ const NodePalette = React.memo(() => {
     condition: 'bg-lime-600'
   }), []);
 
-  const getIndicatorColor = React.useCallback((nodeType) => {
+  // Memoized function to get indicator color
+  const getIndicatorColor = useCallback((nodeType) => {
     return indicatorColorMap[nodeType] || 'bg-slate-600';
   }, [indicatorColorMap]);
+
+  // Memoized node item component to prevent recreation
+  const NodeItem = useCallback(({ node }) => (
+    <div
+      className={`p-3 border rounded-lg cursor-pointer transition-colors ${node.color}`}
+      draggable
+      onDragStart={(event) => onDragStart(event, node.type)}
+    >
+      <div className="flex items-center space-x-3">
+        <div className={`w-3 h-3 rounded-full ${getIndicatorColor(node.type)}`} />
+        <span className="text-sm font-medium text-slate-700">{node.title}</span>
+      </div>
+      <p className="text-xs text-slate-500 mt-1">{node.description}</p>
+    </div>
+  ), [onDragStart, getIndicatorColor]);
+
+  // Memoized category component
+  const CategorySection = useCallback(({ category }) => (
+    <div key={category.title}>
+      <h3 className="text-sm font-medium text-slate-700 mb-3 uppercase tracking-wider">
+        {category.title}
+      </h3>
+      <div className="space-y-2">
+        {category.nodes.map((node) => (
+          <NodeItem key={node.type} node={node} />
+        ))}
+      </div>
+    </div>
+  ), []);
 
   return (
     <div className="w-80 bg-white border-r border-slate-200 flex flex-col">
       <div className="flex-1 overflow-y-auto p-6">
         <div className="space-y-6">
           {nodeCategories.map((category) => (
-            <div key={category.title}>
-              <h3 className="text-sm font-medium text-slate-700 mb-3 uppercase tracking-wider">
-                {category.title}
-              </h3>
-              <div className="space-y-2">
-                {category.nodes.map((node) => (
-                  <div
-                    key={node.type}
-                    className={`p-3 border rounded-lg cursor-pointer transition-colors ${node.color}`}
-                    draggable
-                    onDragStart={(event) => onDragStart(event, node.type)}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-3 h-3 rounded-full ${getIndicatorColor(node.type)}`} />
-                      <span className="text-sm font-medium text-slate-700">{node.title}</span>
-                    </div>
-                    <p className="text-xs text-slate-500 mt-1">{node.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <CategorySection key={category.title} category={category} />
           ))}
         </div>
       </div>

@@ -22,6 +22,7 @@ const InputNode = React.memo(({ id, data, isConnectable }) => {
           icon={<Download className="w-4 h-4" />}
           outputs={outputs}
           isConnectable={isConnectable}
+          onDeleteNode={data?.onDeleteNode}
       >
         <div className="space-y-3">
           <div className="grid w-full gap-1.5">

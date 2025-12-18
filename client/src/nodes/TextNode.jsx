@@ -53,6 +53,7 @@ const TextNode = React.memo(({ id, data, isConnectable }) => {
       inputs={inputs}
       outputs={outputs}
       isConnectable={isConnectable}
+      onDeleteNode={data?.onDeleteNode}
       className="w-80"
     >
       <div className="space-y-4">

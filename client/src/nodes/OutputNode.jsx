@@ -53,6 +53,7 @@ const OutputNode = React.memo(({ id, data, isConnectable }) => {
           inputs={inputs}
           outputs={outputs}
           isConnectable={isConnectable}
+          onDeleteNode={data?.onDeleteNode}
       >
         <div className="space-y-4">
           <div className="grid w-full gap-1.5">

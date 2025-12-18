@@ -31,6 +31,7 @@ const ConditionNode = React.memo(({ id, data, isConnectable, selected }) => {
           outputs={outputs}
           isConnectable={isConnectable}
           className={selected ? 'ring-2 ring-blue-500' : ''}
+          onDeleteNode={data?.onDeleteNode}
       >
         <div className="space-y-3" onMouseDown={(e) => e.stopPropagation()}>
           <div className="grid w-full gap-1.5">
