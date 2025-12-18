@@ -22,7 +22,7 @@ const NodeDeleteButton = memo(({ nodeId, nodeTitle, onNodeDelete }) => {
   return (
     <>
       <button
-        className="absolute top-2 right-2 bg-white border-2 border-red-500 rounded-full p-1 hover:bg-red-50 transition-colors cursor-pointer shadow-md opacity-0 hover:opacity-100 group-hover:opacity-100"
+        className="absolute top-2 right-2 bg-white border-2 border-red-500 rounded-full p-1 hover:bg-red-50 transition-colors cursor-pointer shadow-md opacity-100"
         style={{
           width: '24px',
           height: '24px',

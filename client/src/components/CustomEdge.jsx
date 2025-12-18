@@ -17,7 +17,8 @@ const CustomEdge = memo(({
   targetPosition,
   style = {},
   markerEnd,
-  selected
+  selected,
+  data
 }) => {
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
@@ -54,7 +55,7 @@ const CustomEdge = memo(({
           className="nodrag nopan"
         >
           <div className="group relative">
-            <EdgeDeleteButton edgeId={id} />
+            <EdgeDeleteButton edgeId={id} onDeleteEdge={data?.onDeleteEdge} />
           </div>
         </div>
       </EdgeLabelRenderer>

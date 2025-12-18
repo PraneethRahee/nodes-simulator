@@ -25,6 +25,7 @@ const DelayNode = React.memo(({ id, data, isConnectable }) => {
           inputs={inputs}
           outputs={outputs}
           isConnectable={isConnectable}
+          onDeleteNode={data?.onDeleteNode}
       >
         <div className="space-y-3">
           <div>
