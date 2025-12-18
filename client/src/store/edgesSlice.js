@@ -9,7 +9,11 @@ const edgesSlice = createSlice({
   initialState,
   reducers: {
     setEdges: (state, action) => {
-      state.edges = action.payload;
+      if (typeof action.payload === 'function') {
+        state.edges = action.payload(state.edges);
+      } else {
+        state.edges = action.payload;
+      }
     },
     addEdge: (state, action) => {
       state.edges.push(action.payload);

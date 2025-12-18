@@ -1,4 +1,5 @@
-import React, { useState, useCallback, useRef, useMemo } from 'react';
+import React, { useCallback, useRef, useMemo } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import ReactFlow, {
   Background,
   Controls,
@@ -12,31 +13,35 @@ import { nodeTypes } from '@/nodes/nodeTypes.jsx';
 import { edgeTypes } from '@/components/edgeTypes.jsx';
 import FlowControls from './FlowControls.jsx';
 import FlowAlert from './FlowAlert.jsx';
+import {
+  selectNodes,
+  selectEdges,
+  selectIsAlertShowing,
+  selectAlertData,
+  setNodes,
+  setEdges,
+  addEdge,
+  setSelectedNode,
+  deleteEdge,
+  hideAlert,
+} from '@/store';
+import { deleteNodeWithConnectedEdges } from '@/store/thunks';
 
 const OptimizedFlowCanvas = () => {
-  // Use local state for React Flow to manage its own state
-  const [nodes, setNodes] = useState([
-    {
-      id: '1',
-      type: 'input',
-      position: { x: 100, y: 100 },
-      data: { label: 'Input Node' },
-    },
-  ]);
-  const [edges, setEdges] = useState([]);
-
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertData, setAlertData] = useState({});
+  const dispatch = useDispatch();
+  const nodes = useSelector(selectNodes);
+  const edges = useSelector(selectEdges);
+  const isAlertShowing = useSelector(selectIsAlertShowing);
+  const alertData = useSelector(selectAlertData);
+  
   const reactFlowWrapper = useRef(null);
-  const [reactFlowInstance, setReactFlowInstance] = useState(null);
+  const [reactFlowInstance, setReactFlowInstance] = React.useState(null);
 
-  // Memoized alert title styles to prevent recreation
   const alertTitleStyles = useMemo(() => ({
     validDAG: 'bg-emerald-100',
     invalidDAG: 'bg-red-100'
   }), []);
 
-  // Memoized node color map for MiniMap
   const nodeColorMap = useMemo(() => ({
     input: '#3b82f6',
     output: '#10b981',
@@ -49,23 +54,27 @@ const OptimizedFlowCanvas = () => {
     condition: '#84cc16'
   }), []);
 
-  // Memoized function to get node color
   const getNodeColor = useCallback((nodeType) => {
     return nodeColorMap[nodeType] || '#64748b';
   }, [nodeColorMap]);
 
-  // Optimized nodes change handler
   const onNodesChange = useCallback((changes) => {
     console.log('Node changes:', changes);
-    setNodes(currentNodes => applyNodeChanges(changes, currentNodes));
-  }, []);
+    // Use functional update to get the most current state
+    dispatch(setNodes(currentNodes => {
+      const updatedNodes = applyNodeChanges(changes, currentNodes);
+      return updatedNodes;
+    }));
+  }, [dispatch]);
 
-  // Optimized edges change handler
   const onEdgesChange = useCallback((changes) => {
-    setEdges(currentEdges => applyEdgeChanges(changes, currentEdges));
-  }, []);
+    // Use functional update to get the most current state
+    dispatch(setEdges(currentEdges => {
+      const updatedEdges = applyEdgeChanges(changes, currentEdges);
+      return updatedEdges;
+    }));
+  }, [dispatch]);
 
-  // Optimized connection handler
   const onConnect = useCallback((params) => {
     const newEdge = {
       ...params,
@@ -78,73 +87,29 @@ const OptimizedFlowCanvas = () => {
         height: 20,
       },
     };
-    setEdges(prevEdges => [...prevEdges, newEdge]);
-  }, []);
+    dispatch(addEdge(newEdge));
+  }, [dispatch]);
 
-  // Optimized node click handler
   const onNodeClick = useCallback((event, node) => {
-    // Handle node selection if needed
     console.log('Node clicked:', node);
-  }, []);
+    dispatch(setSelectedNode(node.id));
+  }, [dispatch]);
 
-  // Handle node deletion
   const handleNodeDelete = useCallback((nodeId) => {
     console.log(`Deleting node ${nodeId} and its connected edges`);
-    
-    // Use functional updates to get the latest state
-    setNodes(currentNodes => {
-      const nodeChanges = [{
-        type: 'remove',
-        id: nodeId
-      }];
-      
-      const newNodes = applyNodeChanges(nodeChanges, currentNodes);
-      console.log('New nodes after deletion:', newNodes);
-      
-      // Update edges with the latest state
-      setEdges(currentEdges => {
-        const edgeChanges = currentEdges
-          .filter(edge => edge.source === nodeId || edge.target === nodeId)
-          .map(edge => ({
-            type: 'remove',
-            id: edge.id
-          }));
-        
-        const newEdges = applyEdgeChanges(edgeChanges, currentEdges);
-        console.log('New edges after deletion:', newEdges);
-        
-        return newEdges;
-      });
-      
-      return newNodes;
-    });
-  }, []); // Remove nodes and edges from dependencies to avoid stale closures
+    dispatch(deleteNodeWithConnectedEdges(nodeId));
+  }, [dispatch]);
 
-  // Handle edge deletion
   const handleEdgeDelete = useCallback((edgeId) => {
     console.log(`Deleting edge ${edgeId}`);
-    
-    // Use functional update to get the latest state
-    setEdges(currentEdges => {
-      const edgeChanges = [{
-        type: 'remove',
-        id: edgeId
-      }];
-      
-      const newEdges = applyEdgeChanges(edgeChanges, currentEdges);
-      console.log('New edges after deletion:', newEdges);
-      
-      return newEdges;
-    });
-  }, []); // No dependencies needed with functional updates
+    dispatch(deleteEdge(edgeId));
+  }, [dispatch]);
 
-  // Optimized drag over handler
   const onDragOver = useCallback((event) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = 'move';
   }, []);
 
-  // Optimized drop handler
   const onDrop = useCallback(
     (event) => {
       event.preventDefault();
@@ -178,12 +143,14 @@ const OptimizedFlowCanvas = () => {
         item: newNode
       };
       
-      setNodes(currentNodes => applyNodeChanges([change], currentNodes));
+      dispatch(setNodes(currentNodes => {
+        const updatedNodes = applyNodeChanges([change], currentNodes);
+        return updatedNodes;
+      }));
     },
     [reactFlowInstance]
   );
 
-  // Memoized ReactFlow props to prevent unnecessary re-renders
   const reactFlowProps = useMemo(() => ({
     edges,
     onNodesChange,
@@ -219,7 +186,6 @@ const OptimizedFlowCanvas = () => {
     edgeTypes,
   ]);
 
-  // Memoized MiniMap props
   const minimapProps = useMemo(() => ({
     nodeColor: getNodeColor,
     maskColor: "rgba(255, 255, 255, 0.8)",
@@ -251,21 +217,13 @@ const OptimizedFlowCanvas = () => {
         </ReactFlow>
       </div>
 
-      <FlowControls
-        nodes={nodes}
-        edges={edges}
-        onAlert={(data) => {
-          setAlertData(data);
-          setShowAlert(true);
-        }}
-        onError={(error) => console.error(error)}
-      />
+      <FlowControls />
 
       <FlowAlert
-        show={showAlert}
+        show={isAlertShowing}
         alertData={alertData}
         alertTitleStyles={alertTitleStyles}
-        onClose={() => setShowAlert(false)}
+        onClose={() => dispatch(hideAlert())}
       />
     </div>
   );

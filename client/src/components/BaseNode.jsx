@@ -76,33 +76,28 @@ const createOutputHandles = (outputs, handleColor, isConnectable) =>
   });
 
 const BaseNode = React.memo(({type,title,icon,children,inputs = [],outputs = [],className,isConnectable = true,id, onDeleteNode}) => {
-  // Memoized color classes to prevent recreation on every render
   const colorClasses = React.useMemo(() => ({
     handle: NODE_HANDLE_COLORS[type] || DEFAULT_HANDLE_COLOR,
     header: NODE_COLOR_CLASSES[type] || DEFAULT_NODE_COLOR,
     indicator: NODE_INDICATOR_COLORS[type] || DEFAULT_INDICATOR_COLOR
   }), [type]);
 
-  // Memoized input handles
   const inputHandles = React.useMemo(() =>
     createInputHandles(inputs, colorClasses.handle, isConnectable, type),
     [inputs, colorClasses.handle, isConnectable, type]
   );
 
-  // Memoized output handles
   const outputHandles = React.useMemo(() =>
     createOutputHandles(outputs, colorClasses.handle, isConnectable),
     [outputs, colorClasses.handle, isConnectable]
   );
 
-  // Memoized delete handler
   const handleNodeDelete = React.useCallback((nodeId) => {
     console.log(`BaseNode handleNodeDelete called with nodeId: ${nodeId}`);
     console.log('onDeleteNode function:', onDeleteNode);
     onDeleteNode(nodeId);
   }, [onDeleteNode]);
 
-  // Memoized card classes
   const cardClasses = React.useMemo(() =>
     cn(
       "w-80 min-w-80 shadow-lg hover:shadow-xl transition-shadow border-2 bg-white",
@@ -111,13 +106,11 @@ const BaseNode = React.memo(({type,title,icon,children,inputs = [],outputs = [],
     [className]
   );
 
-  // Memoized header classes
   const headerClasses = React.useMemo(() =>
     cn("p-3 pb-2 rounded-t-lg", colorClasses.header),
     [colorClasses.header]
   );
 
-  // Memoized icon container classes
   const iconContainerClasses = React.useMemo(() =>
     cn("w-4 h-4 flex items-center justify-center", colorClasses.indicator.replace('bg-', 'text-')),
     [colorClasses.indicator]

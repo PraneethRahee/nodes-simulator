@@ -4,14 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Play, Save, Download } from 'lucide-react';
 
 const NodePalette = React.memo(() => {
-  // Memoized drag start handler
   const onDragStart = useCallback((event, nodeType) => {
     console.log('Drag started for node type:', nodeType);
     event.dataTransfer.setData('application/reactflow', nodeType);
     event.dataTransfer.effectAllowed = 'move';
   }, []);
 
-  // Memoized node categories to prevent recreation
   const nodeCategories = useMemo(() => [
     {
       title: 'Core Nodes',
@@ -34,7 +32,6 @@ const NodePalette = React.memo(() => {
     }
   ], []);
 
-  // Memoized indicator color map
   const indicatorColorMap = useMemo(() => ({
     input: 'bg-blue-600',
     output: 'bg-emerald-600',
@@ -47,12 +44,10 @@ const NodePalette = React.memo(() => {
     condition: 'bg-lime-600'
   }), []);
 
-  // Memoized function to get indicator color
   const getIndicatorColor = useCallback((nodeType) => {
     return indicatorColorMap[nodeType] || 'bg-slate-600';
   }, [indicatorColorMap]);
 
-  // Memoized node item component to prevent recreation
   const NodeItem = useCallback(({ node }) => (
     <div
       className={`p-3 border rounded-lg cursor-pointer transition-colors ${node.color}`}
@@ -67,7 +62,6 @@ const NodePalette = React.memo(() => {
     </div>
   ), [onDragStart, getIndicatorColor]);
 
-  // Memoized category component
   const CategorySection = useCallback(({ category }) => (
     <div key={category.title}>
       <h3 className="text-sm font-medium text-slate-700 mb-3 uppercase tracking-wider">

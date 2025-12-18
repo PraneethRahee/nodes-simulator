@@ -10,8 +10,6 @@ const initialState = {
     },
   ],
   selectedNode: null,
-  isLoading: false,
-  error: null,
 };
 
 const nodesSlice = createSlice({
@@ -19,7 +17,11 @@ const nodesSlice = createSlice({
   initialState,
   reducers: {
     setNodes: (state, action) => {
-      state.nodes = action.payload;
+      if (typeof action.payload === 'function') {
+        state.nodes = action.payload(state.nodes);
+      } else {
+        state.nodes = action.payload;
+      }
     },
     addNode: (state, action) => {
       state.nodes.push(action.payload);
@@ -38,15 +40,6 @@ const nodesSlice = createSlice({
     setSelectedNode: (state, action) => {
       state.selectedNode = action.payload;
     },
-    setLoading: (state, action) => {
-      state.isLoading = action.payload;
-    },
-    setError: (state, action) => {
-      state.error = action.payload;
-    },
-    clearError: (state) => {
-      state.error = null;
-    },
   },
 });
 
@@ -55,11 +48,7 @@ export const {
   addNode,
   updateNode,
   deleteNode,
-  deleteNodeWithEdges,
   setSelectedNode,
-  setLoading,
-  setError,
-  clearError,
 } = nodesSlice.actions;
 
 export default nodesSlice.reducer;
