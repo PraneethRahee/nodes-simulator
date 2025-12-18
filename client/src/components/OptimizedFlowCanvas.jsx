@@ -27,6 +27,9 @@ import {
 } from '@/store';
 import { deleteNodeWithConnectedEdges } from '@/store/thunks';
 
+// Simple counter for generating unique IDs more efficiently than Date.now()
+let edgeIdCounter = 0;
+
 const OptimizedFlowCanvas = () => {
   const dispatch = useDispatch();
   const nodes = useSelector(selectNodes);
@@ -78,7 +81,7 @@ const OptimizedFlowCanvas = () => {
   const onConnect = useCallback((params) => {
     const newEdge = {
       ...params,
-      id: `edge-${Date.now()}`,
+      id: `edge-${++edgeIdCounter}`,
       type: 'custom',
       animated: true,
       markerEnd: {
@@ -151,8 +154,29 @@ const OptimizedFlowCanvas = () => {
     [reactFlowInstance]
   );
 
+  // Memoize nodes with delete handlers
+  const nodesWithHandlers = useMemo(() =>
+    nodes.map(node => ({
+      ...node,
+      data: {
+        ...node.data,
+        onDeleteNode: handleNodeDelete
+      }
+    })), [nodes, handleNodeDelete]);
+
+  // Memoize edges with delete handlers
+  const edgesWithHandlers = useMemo(() =>
+    edges.map(edge => ({
+      ...edge,
+      data: {
+        ...edge.data,
+        onDeleteEdge: handleEdgeDelete
+      }
+    })), [edges, handleEdgeDelete]);
+
   const reactFlowProps = useMemo(() => ({
-    edges,
+    nodes: nodesWithHandlers,
+    edges: edgesWithHandlers,
     onNodesChange,
     onEdgesChange,
     onConnect,
@@ -174,14 +198,14 @@ const OptimizedFlowCanvas = () => {
     snapToGrid: true,
     snapGrid: [15, 15],
   }), [
-    edges,
+    nodesWithHandlers,
+    edgesWithHandlers,
     onNodesChange,
     onEdgesChange,
     onConnect,
     onNodeClick,
     onDrop,
     onDragOver,
-    handleNodeDelete,
     nodeTypes,
     edgeTypes,
   ]);
@@ -196,20 +220,6 @@ const OptimizedFlowCanvas = () => {
       <div className="flex-1 relative" ref={reactFlowWrapper}>
         <ReactFlow
           {...reactFlowProps}
-          nodes={nodes.map(node => ({
-            ...node,
-            data: {
-              ...node.data,
-              onDeleteNode: handleNodeDelete
-            }
-          }))}
-          edges={edges.map(edge => ({
-            ...edge,
-            data: {
-              ...edge.data,
-              onDeleteEdge: handleEdgeDelete
-            }
-          }))}
         >
           <Background variant="dots" gap={20} size={1} />
           <Controls />

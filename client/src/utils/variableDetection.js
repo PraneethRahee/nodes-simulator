@@ -1,4 +1,27 @@
 
+import { useMemo } from 'react';
+
+export const useExtractVariables = (text) => {
+  return useMemo(() => {
+    if (!text || typeof text !== 'string') {
+      return [];
+    }
+
+    const variableRegex = /\{\{([^}]+)\}\}/g;
+    const variables = [];
+    let match;
+
+    while ((match = variableRegex.exec(text)) !== null) {
+      const variableName = match[1].trim();
+      if (variableName && !variables.includes(variableName)) {
+        variables.push(variableName);
+      }
+    }
+
+    return variables;
+  }, [text]);
+};
+
 export const extractVariables = (text) => {
   if (!text || typeof text !== 'string') {
     return [];
